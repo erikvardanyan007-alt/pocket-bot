@@ -1,11 +1,22 @@
 import asyncio
+import threading
+import os
 import requests
+from flask import Flask
 from pocketoption import PocketOption
 
-APP_SERVER_URL = https://remix-remix-trading-signals-telegram-mini-app-950378129316.europe-west2.run.app/api/quotes/feed"
-PO_SSID = 42["chat_room_list_update",{"message":{"room_id":14906,"user_id":115981790,"date":1788732671,"message_id":639053084,"message":" Hola necesito ayuda para retirar mi dinero por que...","message_hidden":0,"message_secret":false,"message_content":null}}]
+# Flask-сервер для предотвращения ошибок деплоя на Render
+app = Flask(__name__)
 
-async def main():
+@app.route('/')
+def home():
+    return "Pocket Option Bridge is Running!"
+
+# Настройки подключения
+APP_SERVER_URL = "https://remix-remix-trading-signals-telegram-mini-app-950378129316.europe-west2.run.app/api/quotes/feed"
+PO_SSID = '42["auth",{"session":"1.1788734313.1788734570.G-E6RB4FHY15.k4AbRpEE_l7wxkidhaWWwA","isDemo":1,"uid":128693934,"platform":1}]'
+
+async def run_bridge():
     po_client = PocketOption(ssid=PO_SSID)
 
     @po_client.on.update_close_value
@@ -43,5 +54,15 @@ async def main():
     while True:
         await asyncio.sleep(1)
 
+def start_async_loop():
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
+    loop.run_until_complete(run_bridge())
+
 if __name__ == "__main__":
-    asyncio.run(main())
+    # Запуск логики WebSocket в отдельном потоке
+    threading.Thread(target=start_async_loop, daemon=True).start()
+    
+    # Запуск веб-сервера на порту Render
+    port = int(os.environ.get("PORT", 10000))
+    app.run(host="0.0.0.0", port=port)
