@@ -1,5 +1,4 @@
-pocket-option
-requests
-pocket-option
+git+https://github.com/KolesnichenkoDmitriy/PocketOptionAPI.git
 requests
 flask
+gunicorn
