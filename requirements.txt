@@ -1,4 +1,4 @@
-pocketoption
+https://github.com/KolesnichenkoDmitriy/PocketOptionAPI/archive/refs/heads/main.zip
 websocket-client
 requests
 flask
