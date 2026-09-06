@@ -1,4 +1,3 @@
-pocketoption-api
 websocket-client
 requests
 flask
