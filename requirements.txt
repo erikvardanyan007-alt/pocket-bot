@@ -1,2 +1,5 @@
 pocket-option
 requests
+pocket-option
+requests
+flask
