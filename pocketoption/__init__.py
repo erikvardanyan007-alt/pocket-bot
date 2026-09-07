@@ -65,9 +65,4 @@ class PocketOption:
         self.is_connected = False
         logger.info("WebSocket connection closed")
 
-# Экспортируем экземпляр по умолчанию для поддержки обратной совместимости
 po_client = PocketOption()
-
-    def _on_close(self, ws, close_status_code, close_msg):
-        self.is_connected = False
-        logger.info("WebSocket connection closed")
