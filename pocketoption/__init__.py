@@ -7,7 +7,7 @@ from websocket import WebSocketApp
 logger = logging.getLogger(__name__)
 
 class PocketOption:
-    def __init__(self, ssid: str):
+    def __init__(self, ssid: str = ""):
         self.ssid = ssid
         self.ws = None
         self.is_connected = False
@@ -18,6 +18,10 @@ class PocketOption:
             self.callbacks[event_name] = func
             return func
         return decorator
+
+    def update_close_value(self, func):
+        self.callbacks["update_close_value"] = func
+        return func
 
     def connect(self):
         url = "wss://api2.pocketoption.com/socket.io/?EIO=4&transport=websocket"
@@ -35,8 +39,6 @@ class PocketOption:
         logger.info("WebSocket connected. Authenticating...")
         auth_msg = f'42["auth", {{"session": "{self.ssid}", "isDemo": 1}}]'
         ws.send(auth_msg)
-        if "connect" in self.callbacks:
-            self.callbacks["connect"]()
 
     def _on_message(self, ws, message):
         if message == "2":
@@ -51,21 +53,20 @@ class PocketOption:
                 
                 if event in self.callbacks:
                     self.callbacks[event](payload)
-                elif "update_close_value" in self.callbacks and event == "updateStream":
+                elif "update_close_value" in self.callbacks:
                     self.callbacks["update_close_value"](payload)
             except Exception as e:
                 logger.error(f"Error parsing message: {e}")
 
     def _on_error(self, ws, error):
         logger.error(f"WebSocket error: {error}")
-        if "error" in self.callbacks:
-            self.callbacks["error"](error)
 
     def _on_close(self, ws, close_status_code, close_msg):
         self.is_connected = False
         logger.info("WebSocket connection closed")
-        if "close" in self.callbacks:
-            self.callbacks["close"]()
+
+# Экспортируем экземпляр по умолчанию для поддержки обратной совместимости
+po_client = PocketOption()
 
     def _on_close(self, ws, close_status_code, close_msg):
         self.is_connected = False
