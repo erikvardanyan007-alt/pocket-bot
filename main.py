@@ -15,6 +15,7 @@ APP_SERVER_URL = "https://remix-remix-trading-signals-telegram-mini-app-95037812
 PO_SSID = '42["auth",{"session":"1.1788734313.1788734570.G-E6RB4FHY15.k4AbRpEE_l7wxkidhaWWwA","isDemo":1,"uid":128693934,"platform":1}]'
 
 async def run_bridge():
+    print("[INFO] Starting PocketOption client...")
     po_client = PocketOption(ssid=PO_SSID)
 
     @po_client.update_close_value
@@ -35,21 +36,28 @@ async def run_bridge():
                     timeout=0.3
                 )
                 print(f"[SENT] {asset}: {price}")
-            except Exception:
-                pass
+            except Exception as e:
+                print(f"[ERROR] Request failed: {e}")
 
-    po_client.connect()
+    try:
+        po_client.connect()
+        print("[INFO] Connect method called.")
+    except Exception as e:
+        print(f"[ERROR] Connection failed: {e}")
+
+    await asyncio.sleep(3)
 
     try:
         all_assets = po_client.get_all_assets()
+        print(f"[INFO] Subscribing to assets: {all_assets}")
         for asset in all_assets:
             try:
                 po_client.change_asset(asset)
                 po_client.subscribe_to_asset(asset)
-            except Exception:
-                continue
-    except Exception:
-        pass
+            except Exception as e:
+                print(f"[ERROR] Asset {asset} subscription error: {e}")
+    except Exception as e:
+        print(f"[ERROR] Assets error: {e}")
 
     while True:
         await asyncio.sleep(1)
