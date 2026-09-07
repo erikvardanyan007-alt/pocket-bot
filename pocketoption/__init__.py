@@ -24,7 +24,7 @@ class PocketOption:
         return func
 
     def connect(self):
-        url = "wss://api2.pocketoption.com/socket.io/?EIO=4&transport=websocket"
+        url = "wss://api.pocketoption.com/socket.io/?EIO=4&transport=websocket"
         self.ws = WebSocketApp(
             url,
             on_open=self._on_open,
@@ -33,6 +33,19 @@ class PocketOption:
             on_close=self._on_close
         )
         threading.Thread(target=self.ws.run_forever, daemon=True).start()
+
+    def get_all_assets(self):
+        return ["EURUSD", "GBPUSD", "USDJPY"]
+
+    def change_asset(self, asset: str):
+        if self.ws and self.is_connected:
+            msg = f'42["changeAsset", {{"asset": "{asset}"}}]'
+            self.ws.send(msg)
+
+    def subscribe_to_asset(self, asset: str):
+        if self.ws and self.is_connected:
+            msg = f'42["subscribe", {{"asset": "{asset}"}}]'
+            self.ws.send(msg)
 
     def _on_open(self, ws):
         self.is_connected = True
@@ -53,7 +66,7 @@ class PocketOption:
                 
                 if event in self.callbacks:
                     self.callbacks[event](payload)
-                elif "update_close_value" in self.callbacks:
+                elif "update_close_value" in self.callbacks and event == "updateStream":
                     self.callbacks["update_close_value"](payload)
             except Exception as e:
                 logger.error(f"Error parsing message: {e}")
