@@ -38,16 +38,18 @@ async def run_bridge():
             except Exception:
                 pass
 
-    await po_client.connect()
+    po_client.connect()
 
-    all_assets = await po_client.get_all_assets()
-
-    for asset in all_assets:
-        try:
-            await po_client.emit.change_asset(asset)
-            await po_client.emit.subscribe_to_asset(asset)
-        except Exception:
-            continue
+    try:
+        all_assets = po_client.get_all_assets()
+        for asset in all_assets:
+            try:
+                po_client.change_asset(asset)
+                po_client.subscribe_to_asset(asset)
+            except Exception:
+                continue
+    except Exception:
+        pass
 
     while True:
         await asyncio.sleep(1)
