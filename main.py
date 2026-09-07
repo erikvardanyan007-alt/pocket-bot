@@ -20,7 +20,6 @@ async def run_bridge():
         asset = data.get("asset")
         price = data.get("close")
         timestamp = data.get("time")
-        
         print(f"[TICK] Asset: {asset} | Price: {price} | Time: {timestamp}")
 
     await po_client.connect()
