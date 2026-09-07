@@ -17,7 +17,7 @@ PO_SSID = '42["auth",{"session":"1.1788734313.1788734570.G-E6RB4FHY15.k4AbRpEE_l
 async def run_bridge():
     po_client = PocketOption(ssid=PO_SSID)
 
-    @po_client.on.update_close_value
+    @po_client.update_close_value
     def on_price(data):
         asset = data.get("asset")
         price = data.get("close")
