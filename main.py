@@ -30,7 +30,6 @@ if __name__ == '__main__':
     import threading
     import asyncio
 
-    # Запуск WebSocket-клиента в отдельном потоке
     def start_background_loop(loop):
         asyncio.set_event_loop(loop)
         loop.run_until_complete(run_bridge())
@@ -39,6 +38,5 @@ if __name__ == '__main__':
     t = threading.Thread(target=start_background_loop, args=(new_loop,), daemon=True)
     t.start()
 
-    # Запуск Flask-сервера для Render
     port = int(os.environ.get("PORT", 10000))
     app.run(host="0.0.0.0", port=port)
