@@ -21,7 +21,6 @@ async def run_bridge():
         price = data.get("close")
         timestamp = data.get("time")
         
-        # Вывод в логи Render для проверки тиков
         print(f"[TICK] Asset: {asset} | Price: {price} | Time: {timestamp}")
 
     await po_client.connect()
