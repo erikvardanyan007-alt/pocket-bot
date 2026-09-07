@@ -12,7 +12,7 @@ def home():
     return "Pocket Option Bridge is Running!"
 
 APP_SERVER_URL = "https://remix-remix-trading-signals-telegram-mini-app-950378129316.europe-west2.run.app/api/quotes/feed"
-PO_SSID = '42["auth",{"session":"1.1788734313.1788734570.G-E6RB4FHY15.k4AbRpEE_l7wxkidhaWWwA","isDemo":1,"uid":128693934,"platform":1}]'
+PO_SSID = '42["auth",{"session":"6h7fgmvcd6rcm1db9ebknaubag","platform":4,"isFastHistory":true,"isOptimized":true}]'
 
 async def run_bridge():
     print("[INFO] Starting PocketOption client...")
