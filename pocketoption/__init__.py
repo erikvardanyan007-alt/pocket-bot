@@ -1,6 +1,7 @@
 import time
 import json
 import logging
+import threading
 from websocket import WebSocketApp
 
 logger = logging.getLogger(__name__)
@@ -10,6 +11,13 @@ class PocketOption:
         self.ssid = ssid
         self.ws = None
         self.is_connected = False
+        self.callbacks = {}
+
+    def on(self, event_name):
+        def decorator(func):
+            self.callbacks[event_name] = func
+            return func
+        return decorator
 
     def connect(self):
         url = "wss://api2.pocketoption.com/socket.io/?EIO=4&transport=websocket"
@@ -20,7 +28,6 @@ class PocketOption:
             on_error=self._on_error,
             on_close=self._on_close
         )
-        import threading
         threading.Thread(target=self.ws.run_forever, daemon=True).start()
 
     def _on_open(self, ws):
@@ -28,13 +35,37 @@ class PocketOption:
         logger.info("WebSocket connected. Authenticating...")
         auth_msg = f'42["auth", {{"session": "{self.ssid}", "isDemo": 1}}]'
         ws.send(auth_msg)
+        if "connect" in self.callbacks:
+            self.callbacks["connect"]()
 
     def _on_message(self, ws, message):
         if message == "2":
             ws.send("3")
+            return
+        
+        if message.startswith("42"):
+            try:
+                data = json.loads(message[2:])
+                event = data[0]
+                payload = data[1] if len(data) > 1 else None
+                
+                if event in self.callbacks:
+                    self.callbacks[event](payload)
+                elif "update_close_value" in self.callbacks and event == "updateStream":
+                    self.callbacks["update_close_value"](payload)
+            except Exception as e:
+                logger.error(f"Error parsing message: {e}")
 
     def _on_error(self, ws, error):
         logger.error(f"WebSocket error: {error}")
+        if "error" in self.callbacks:
+            self.callbacks["error"](error)
+
+    def _on_close(self, ws, close_status_code, close_msg):
+        self.is_connected = False
+        logger.info("WebSocket connection closed")
+        if "close" in self.callbacks:
+            self.callbacks["close"]()
 
     def _on_close(self, ws, close_status_code, close_msg):
         self.is_connected = False
